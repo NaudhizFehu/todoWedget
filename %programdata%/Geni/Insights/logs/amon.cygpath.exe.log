@@ -1,0 +1,12 @@
+[32712:1] 2025-12-03 13:54:30.867 [0x62E0(0) CxCommonApi::LogModuleInfo] [MODULE LOADING] ModuleName amon64.dll, Version [2.0.0.1], ModulePath C:\Program Files\Geni\Insights\temp\amon64.dll ModifiedTime 2023-01-12 12:42:20
+[32712:1] 2025-12-03 13:54:30.868 [0x62E0(0) CxSensorPipeClient::Initialize] [Initialize]
+[32712:1] 2025-12-03 13:54:30.869 [0x62E0(0) CxThreadPool::Initialize] Queue init : OutputQue 0, nThreadPoolSize : 1
+[32712:1] 2025-12-03 13:54:30.869 [0x62E0(183) CxThreadPool::CreateThreadPool] Create 1 WorkerThread
+[32712:1] 2025-12-03 13:54:30.871 [0x62E0(0) CAttachMonitor::_InstallHook] [INSTALL_HOOK] GetOpenFileNameW : cygpath.exe:32712
+[32712:1] 2025-12-03 13:54:30.872 [0x62E0(183) CAttachMonitor::_InstallHook] [INSTALL_HOOK] CoCreateInstance : cygpath.exe:32712
+[32712:1] 2025-12-03 13:54:30.873 [0x62E0(183) CAttachMonitor::_InstallHook] [INSTALL_HOOK] DoDragDrop : cygpath.exe:32712
+[32712:1] 2025-12-03 13:54:30.874 [0x62E0(183) CUIAManager::Initialize] [Initialize]
+[32712:1] 2025-12-03 13:54:30.874 [0x62E0(183) CUIAManager::Initialize] [/Initialize] SUCCESS
+[32712:1] 2025-12-03 13:54:30.875 [0x62E0(536871044) CxDllNotifier::Initialize] [Initialize]
+[32712:1] 2025-12-03 13:54:30.876 [0x62E0(183) CxDllNotifier::Initialize] [RegisterDllNotification] 00000000007FA100
+[32712:1] 2025-12-03 13:54:30.876 [0x62E0(183) CxDllNotifier::RegisterCallback] [RegisterCallback] Callback 00007FFA71285470 Context 0000000000805ED0

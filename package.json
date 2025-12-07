@@ -1,0 +1,112 @@
+{
+  "name": "todo-widget",
+  "version": "1.0.0",
+  "description": "Windows 위젯 스타일 TodoList 애플리케이션",
+  "main": "src/main/main.js",
+  "homepage": "./",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:react\" \"wait-on http://localhost:11000 && electron .\"",
+    "dev:react": "react-scripts start",
+    "build": "react-scripts build",
+    "build:electron": "npm run build && electron-builder",
+    "build:win": "npm run build && electron-builder --win",
+    "start": "electron .",
+    "test": "react-scripts test"
+  },
+  "keywords": [
+    "electron",
+    "react",
+    "todo",
+    "widget"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "pg": "^8.11.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "autoprefixer": "^10.4.16",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^28.0.0",
+    "electron-builder": "^26.0.12",
+    "postcss": "^8.4.32",
+    "react-scripts": "5.0.1",
+    "tailwindcss": "^3.4.0",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.todowidget.app",
+    "productName": "TodoWidget",
+    "executableName": "TodoWidget",
+    "extends": null,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/main/**/*",       
+      "src/preload/**/*",    
+      "!src/renderer",       
+      "build/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/TodoWidgetIcon.ico",
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "signAndEditExecutable": false
+    },
+    "extraResources": [
+      {
+        "from": "assets",
+        "to": "assets",
+        "filter": ["**/*"]
+      }
+    ],
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TodoWidget",
+      "installerIcon": "assets/TodoWidgetIcon.ico",
+      "uninstallerIcon": "assets/TodoWidgetIcon.ico",
+      "installerHeaderIcon": "assets/TodoWidgetIcon.ico",
+      "runAfterFinish": true
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

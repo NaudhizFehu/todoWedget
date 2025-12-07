@@ -242,6 +242,26 @@ function registerGlobalShortcuts() {
   });
 }
 
+// Single instance lock - 중복 실행 방지
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  // 이미 실행 중이면 종료
+  logger.info('Another instance is already running. Quitting...');
+  app.quit();
+} else {
+  // 두 번째 인스턴스 실행 시도 시
+  app.on('second-instance', () => {
+    logger.info('Second instance detected. Focusing existing window...');
+    // 기존 윈도우를 보여주고 포커스
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      if (!mainWindow.isVisible()) mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+}
+
 app.whenReady().then(async () => {
   logger.info('앱 시작');
   logger.info('로그 파일 경로:', logger.getLogPath());

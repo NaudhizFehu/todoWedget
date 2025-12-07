@@ -21,23 +21,10 @@ function TodoItem({ todo, onToggleComplete, onStatusChange, onDelete, onDescript
 
   return (
     <div className={`flex items-center gap-2 p-2 rounded border ${
-      isOnHold 
-        ? 'bg-gray-700 border-yellow-600 hover:border-yellow-500' 
+      isOnHold
+        ? 'bg-gray-700 border-yellow-600 hover:border-yellow-500'
         : 'bg-gray-800 border-gray-700 hover:border-gray-600'
     }`}>
-      <input
-        type="checkbox"
-        checked={isCompleted}
-        onChange={() => {
-          if (isOnHold) {
-            // 보류 상태에서는 체크박스 클릭 시 미완료로 변경
-            onStatusChange(todo.id, 'pending');
-          } else {
-            onToggleComplete(todo.id, todo.completed);
-          }
-        }}
-        className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-      />
       <div className="flex-1">
         <div className="flex items-center gap-2">
           <span

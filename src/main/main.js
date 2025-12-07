@@ -1,9 +1,10 @@
 const { app, BrowserWindow, ipcMain, globalShortcut, nativeImage } = require('electron');
 const path = require('path');
-const { 
-  initDatabase, 
-  testConnection, 
-  reconnectDatabase, 
+const { getLogger } = require('./logger');
+const {
+  initDatabase,
+  testConnection,
+  reconnectDatabase,
   getDbConfig,
   isConnected
 } = require('./database');
@@ -21,29 +22,29 @@ const {
   deleteMidTermTodo,
 } = require('./dbOperations');
 
-
+const logger = getLogger();
 let mainWindow = null;
 
 // 아이콘 경로를 가져오는 함수
 function getIconPath() {
   const fs = require('fs');
   if (app.isPackaged) {
-    // ✅ 확인된 정확한 경로
+    // Production mode icon path
     const iconPath = path.join(process.resourcesPath, 'assets', 'TodoWidgetIcon.ico');
-    
+
     logger.info('=== 아이콘 경로 디버깅 ===');
     logger.info('process.resourcesPath:', process.resourcesPath);
-    logger.info('iconPath:', iconPath);
+    logger.info('아이콘 경로:', iconPath);
     logger.info('파일 존재:', fs.existsSync(iconPath));
-    
+
     const assetsDir = path.join(process.resourcesPath, 'assets');
     if (fs.existsSync(assetsDir)) {
-      logger.info('assets 폴더 내용:', fs.readdirSync(assetsDir));
+      logger.info('Assets 폴더 내용:', fs.readdirSync(assetsDir));
     } else {
-      logger.error('assets 폴더 없음:', assetsDir);
+      logger.error('Assets 폴더 없음:', assetsDir);
     }
-    logger.info('========================');
-    
+    logger.info('=======================');
+
     return iconPath;
   } else {
     const devIconPath = path.join(__dirname, '../../assets/TodoWidgetIcon.ico');
@@ -65,15 +66,15 @@ function createWindow() {
 
   try {
     icon = nativeImage.createFromPath(iconPath);
-    
-    logger.info('아이콘 객체 isEmpty:', icon.isEmpty());
-    logger.info('아이콘 Size:', icon.getSize());
-    
+
+    logger.info('아이콘 isEmpty:', icon.isEmpty());
+    logger.info('아이콘 크기:', icon.getSize());
+
     if (icon.isEmpty()) {
-      logger.error('아이콘이 비어있음');
+      logger.error('아이콘 비어있음');
       icon = null;
     } else {
-      logger.info('✅ 아이콘 로드 성공');
+      logger.info('아이콘 로드 성공');
     }
   } catch (error) {
     logger.error('아이콘 로드 실패:', error);
@@ -96,7 +97,7 @@ function createWindow() {
     },
   });
 
-  // Windows 작업표시줄 설정
+  // Windows taskbar settings
   if (process.platform === 'win32' && icon && !icon.isEmpty()) {
     try {
       mainWindow.setAppDetails({
@@ -104,23 +105,12 @@ function createWindow() {
         appIconPath: iconPath,
         appIconIndex: 0
       });
-      logger.info('✅ setAppDetails 성공');
+      logger.info('setAppDetails 성공');
     } catch (error) {
       logger.error('setAppDetails 실패:', error);
     }
   }
-
-  // Windows 작업표시줄 세부 정보 설정
-  // if (process.platform === 'win32' && icon) {
-  //   mainWindow.setAppDetails({
-  //     appId: 'com.todowidget.app',
-  //     appIconPath: iconPath,
-  //     appIconIndex: 0,
-  //     relaunchCommand: `"${process.execPath}"`,
-  //     relaunchDisplayName: 'TodoWidget'
-  //   });
-  // }
-
+  
   // window.js에 메인 윈도우 설정
   setMainWindow(mainWindow);
 
@@ -129,11 +119,11 @@ function createWindow() {
     // React 개발 서버가 준비될 때까지 약간 대기
     setTimeout(() => {
       mainWindow.loadURL('http://localhost:11000').catch((err) => {
-        console.error('React 개발 서버 연결 실패:', err);
+        logger.error('React 개발 서버 연결 실패:', err);
         // 재시도
         setTimeout(() => {
           mainWindow.loadURL('http://localhost:11000').catch((err2) => {
-            console.error('React 개발 서버 재연결 실패:', err2);
+            logger.error('React 개발 서버 재연결 실패:', err2);
           });
         }, 2000);
       });
@@ -238,9 +228,9 @@ function setupIpcHandlers() {
     return await disableAutoStart();
   });
 
-  // ✅ 로그 폴더 열기 추가
+  // Log folder opener
   ipcMain.handle('open-log-folder', () => {
-    const logger = getLogger();
+    // const logger = getLogger();
     logger.openLogFolder();
   });
 }
@@ -253,8 +243,8 @@ function registerGlobalShortcuts() {
 }
 
 app.whenReady().then(async () => {
-  logger.info('앱 준비 완료');
-  logger.info('로그 파일 위치:', logger.getLogPath());
+  logger.info('앱 시작');
+  logger.info('로그 파일 경로:', logger.getLogPath());
 
   // Windows 작업표시줄 아이콘을 위한 AppUserModelId 설정 (필수)
   if (process.platform === 'win32') {
@@ -268,10 +258,10 @@ app.whenReady().then(async () => {
       const icon = nativeImage.createFromPath(iconPath);
       if (!icon.isEmpty()) {
         app.setIcon(icon);
-        console.log('✅ 앱 아이콘 설정 성공');
+        logger.info('App icon set successfully');
       }
     } catch (error) {
-      console.error('앱 아이콘 설정 실패:', error);
+      logger.error('App icon set failed:', error);
     }
   }
 
@@ -279,10 +269,10 @@ app.whenReady().then(async () => {
   try {
     const result = await initDatabase();
     if (!result.success) {
-      console.warn('DB 연결 실패, 앱은 계속 실행됩니다.');
+      logger.warn('DB connection failed, app continues to run');
     }
   } catch (error) {
-    console.error('DB 초기화 중 예상치 못한 오류:', error);
+    logger.error('Unexpected error during DB initialization:', error);
   }
   
   // IPC 핸들러 설정
@@ -301,7 +291,7 @@ app.whenReady().then(async () => {
       await enableAutoStart();
     }
   } catch (error) {
-    console.error('자동 시작 설정 실패:', error);
+    logger.error('Auto-start setup failed:', error);
   }
   
   createWindow();

@@ -28,6 +28,14 @@ try {
       ipcRenderer.on('db-reconnected', callback);
       return () => ipcRenderer.removeListener('db-reconnected', callback);
     },
+
+    // Log folder
+    openLogFolder: () => ipcRenderer.invoke('open-log-folder'),
+
+    // Auto start
+    isAutoStartEnabled: () => ipcRenderer.invoke('is-auto-start-enabled'),
+    enableAutoStart: () => ipcRenderer.invoke('enable-auto-start'),
+    disableAutoStart: () => ipcRenderer.invoke('disable-auto-start'),
   });
   
   console.log('electronAPI가 성공적으로 로드되었습니다.');

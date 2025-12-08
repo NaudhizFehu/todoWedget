@@ -34,11 +34,6 @@ function TodoItem({ todo, onToggleComplete, onStatusChange, onDelete, onDescript
           >
             {todo.content}
           </span>
-          {isOnHold && (
-            <span className="text-xs px-1.5 py-0.5 bg-yellow-600 text-yellow-100 rounded">
-              보류
-            </span>
-          )}
           {todo.priority > 0 && (
             <span className={`text-xs ${priorityColors[todo.priority]}`}>
               [{priorityLabels[todo.priority]}]

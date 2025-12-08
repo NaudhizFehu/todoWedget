@@ -58,7 +58,7 @@ function App() {
           }`}
           onClick={() => setActiveTab('midterm')}
         >
-          중기 할일
+          기간제 할일
         </button>
         <button
           className={`px-4 py-2 text-sm font-medium ${

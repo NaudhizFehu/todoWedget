@@ -4,7 +4,7 @@ Windows 위젯 스타일 TodoList 애플리케이션
 
 ## 기능
 
-- 일일 TodoList와 중기 TodoList를 별도로 관리
+- 일일 TodoList와 기간제 TodoList를 별도로 관리
 - 항상 화면 위에 표시되는 위젯 스타일
 - 로컬 PostgreSQL 데이터베이스 사용
 - 드래그로 위치 이동 가능

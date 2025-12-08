@@ -271,7 +271,7 @@ async function createTables(client) {
     CREATE INDEX IF NOT EXISTS idx_midterm_todos_dates ON midterm_todos(start_date, end_date)
   `);
 
-  // 중기할일 status 필드 마이그레이션 (cancelled를 on_hold로 변경)
+  // 기간제할일 status 필드 마이그레이션 (cancelled를 on_hold로 변경)
   try {
     await client.query(`
       UPDATE midterm_todos 
@@ -280,7 +280,7 @@ async function createTables(client) {
     `);
   } catch (error) {
     // 에러 무시 (이미 처리되었거나 필드가 없는 경우)
-    console.log('중기할일 status 마이그레이션:', error.message);
+    console.log('기간제할일 status 마이그레이션:', error.message);
   }
 
   console.log('테이블 생성 완료');

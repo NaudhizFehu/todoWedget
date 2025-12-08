@@ -271,17 +271,17 @@ app.whenReady().then(async () => {
     app.setAppUserModelId('com.todowidget.app');
   }
 
-  // 앱 아이콘 설정 (개발 모드에서만)
-  if (!app.isPackaged) {
+  // 앱 아이콘 설정 (개발 모드, macOS에서만)
+  if (!app.isPackaged && process.platform === 'darwin') {
     try {
       const iconPath = getIconPath();
       const icon = nativeImage.createFromPath(iconPath);
       if (!icon.isEmpty()) {
-        app.setIcon(icon);
-        logger.info('App icon set successfully');
+        app.dock.setIcon(icon);
+        logger.info('App dock icon set successfully (macOS)');
       }
     } catch (error) {
-      logger.error('App icon set failed:', error);
+      logger.error('App dock icon set failed:', error);
     }
   }
 

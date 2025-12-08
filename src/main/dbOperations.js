@@ -131,7 +131,7 @@ async function getMidTermTodos() {
     );
     return result.rows;
   } catch (error) {
-    console.error('중기 할일 조회 실패:', error);
+    console.error('기간제 할일 조회 실패:', error);
     return []; // 에러 시에도 빈 배열 반환
   }
 }
@@ -158,7 +158,7 @@ async function addMidTermTodo(todo) {
     );
     return result.rows[0];
   } catch (error) {
-    console.error('중기 할일 추가 실패:', error);
+    console.error('기간제 할일 추가 실패:', error);
     return { success: false, error: error.message || '할일 추가에 실패했습니다.' };
   }
 }
@@ -211,7 +211,7 @@ async function updateMidTermTodo(id, updates) {
     );
     return result.rows[0];
   } catch (error) {
-    console.error('중기 할일 업데이트 실패:', error);
+    console.error('기간제 할일 업데이트 실패:', error);
     return { success: false, error: error.message || '할일 업데이트에 실패했습니다.' };
   }
 }
@@ -225,7 +225,7 @@ async function deleteMidTermTodo(id) {
     await pool.query('DELETE FROM midterm_todos WHERE id = $1', [id]);
     return { success: true };
   } catch (error) {
-    console.error('중기 할일 삭제 실패:', error);
+    console.error('기간제 할일 삭제 실패:', error);
     return { success: false, error: error.message || '할일 삭제에 실패했습니다.' };
   }
 }

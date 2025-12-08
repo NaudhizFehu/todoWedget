@@ -2,7 +2,7 @@
 
 ## 프로젝트 개요
 Windows에서 위젯처럼 동작하는 TodoList 관리 프로그램을 개발합니다.
-- 일일 TodoList와 중기 TodoList를 별도로 관리
+- 일일 TodoList와 기간제 TodoList를 별도로 관리
 - 항상 화면 위에 표시되는 위젯 스타일
 - 로컬 PostgreSQL 데이터베이스 사용
 
@@ -25,7 +25,7 @@ todo-widget/
 │   ├── renderer/
 │   │   ├── components/
 │   │   │   ├── DailyTodo.jsx    # 일일 할일 컴포넌트
-│   │   │   ├── MidTermTodo.jsx  # 중기 할일 컴포넌트
+│   │   │   ├── MidTermTodo.jsx  # 기간제 할일 컴포넌트
 │   │   │   ├── TodoItem.jsx     # 할일 항목 컴포넌트
 │   │   │   └── Header.jsx       # 드래그 가능한 헤더
 │   │   ├── hooks/
@@ -102,7 +102,7 @@ CREATE INDEX idx_midterm_todos_dates ON midterm_todos(start_date, end_date);
 - 우선순위 설정 (낮음/보통/높음)
 - 날짜 선택하여 과거/미래 할일 조회
 
-### 3. 중기 TodoList 기능
+### 3. 기간제 TodoList 기능
 - 기간이 있는 할일 관리 (시작일~종료일)
 - 진행률 표시 (0-100%)
 - 상태 관리 (대기/진행중/완료/취소)
@@ -110,7 +110,7 @@ CREATE INDEX idx_midterm_todos_dates ON midterm_todos(start_date, end_date);
 - 목록 정렬 (마감일순, 우선순위순)
 
 ### 4. UI/UX
-- 탭 또는 토글로 일일/중기 할일 전환
+- 탭 또는 토글로 일일/기간제 할일 전환
 - 반응형 리스트 (스크롤 가능)
 - 다크모드/라이트모드 지원
 - 부드러운 애니메이션
@@ -136,7 +136,7 @@ CREATE INDEX idx_midterm_todos_dates ON midterm_todos(start_date, end_date);
 ### Phase 3: UI 컴포넌트
 1. 드래그 가능한 헤더 컴포넌트
 2. 일일 TodoList 컴포넌트
-3. 중기 TodoList 컴포넌트
+3. 기간제 TodoList 컴포넌트
 4. TodoItem 컴포넌트
 
 ### Phase 4: 기능 구현

@@ -12,6 +12,10 @@ function MidTermTodo({ isDbConnected = false }) {
     end_date: new Date().toISOString().split('T')[0],
     priority: 0,
   });
+  const [editingContentId, setEditingContentId] = useState(null);
+  const [editContentValue, setEditContentValue] = useState('');
+  const [editingPeriodId, setEditingPeriodId] = useState(null);
+  const [editPeriodData, setEditPeriodData] = useState({ start_date: '', end_date: '' });
 
   useEffect(() => {
     loadTodos();
@@ -23,7 +27,7 @@ function MidTermTodo({ isDbConnected = false }) {
         const data = await window.electronAPI.getMidTermTodos();
         setTodos(data || []);
       } catch (error) {
-        console.error('중기 할일 로드 실패:', error);
+        console.error('기간제 할일 로드 실패:', error);
       }
     }
   };
@@ -48,19 +52,42 @@ function MidTermTodo({ isDbConnected = false }) {
         setShowAddForm(false);
         loadTodos();
       } catch (error) {
-        console.error('중기 할일 추가 실패:', error);
+        console.error('기간제 할일 추가 실패:', error);
       }
     }
   };
 
-  const handleUpdateProgress = async (id, progress) => {
+  const handleUpdateContent = async (id, newContent) => {
     if (window.electronAPI) {
       try {
-        await window.electronAPI.updateMidTermTodo(id, { progress });
+        await window.electronAPI.updateMidTermTodo(id, { content: newContent });
+        setEditingContentId(null);
         loadTodos();
       } catch (error) {
-        console.error('진행률 업데이트 실패:', error);
-        alert(`진행률 업데이트에 실패했습니다: ${error.message || error}`);
+        console.error('상세정보 업데이트 실패:', error);
+        alert(`상세정보 업데이트에 실패했습니다: ${error.message || error}`);
+      }
+    }
+  };
+
+  const handleUpdatePeriod = async (id, startDate, endDate) => {
+    // 시작일이 종료일보다 늦으면 경고
+    if (new Date(startDate) > new Date(endDate)) {
+      alert('시작일은 종료일보다 이후일 수 없습니다.');
+      return;
+    }
+
+    if (window.electronAPI) {
+      try {
+        await window.electronAPI.updateMidTermTodo(id, {
+          start_date: startDate,
+          end_date: endDate
+        });
+        setEditingPeriodId(null);
+        loadTodos();
+      } catch (error) {
+        console.error('기간 업데이트 실패:', error);
+        alert(`기간 업데이트에 실패했습니다: ${error.message || error}`);
       }
     }
   };
@@ -96,7 +123,7 @@ function MidTermTodo({ isDbConnected = false }) {
         await window.electronAPI.deleteMidTermTodo(id);
         loadTodos();
       } catch (error) {
-        console.error('중기 할일 삭제 실패:', error);
+        console.error('기간제 할일 삭제 실패:', error);
       }
     }
   };
@@ -150,7 +177,7 @@ function MidTermTodo({ isDbConnected = false }) {
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
-          {showAddForm ? '취소' : '+ 중기 할일 추가'}
+          {showAddForm ? '취소' : '+ 기간제 할일 추가'}
         </button>
       </div>
 
@@ -291,16 +318,16 @@ function MidTermTodo({ isDbConnected = false }) {
         {filteredTodos.length === 0 ? (
           <div className="text-center text-gray-500 mt-8">
             {todos.length === 0
-              ? '중기 할일이 없습니다'
+              ? '기간제 할일이 없습니다'
               : filter === 'pending'
-              ? '미완료 중기 할일이 없습니다'
+              ? '미완료 기간제 할일이 없습니다'
               : filter === 'in_progress'
-              ? '작업중인 중기 할일이 없습니다'
+              ? '작업중인 기간제 할일이 없습니다'
               : filter === 'on_hold'
-              ? '보류된 중기 할일이 없습니다'
+              ? '보류된 기간제 할일이 없습니다'
               : filter === 'completed'
-              ? '완료된 중기 할일이 없습니다'
-              : '중기 할일이 없습니다'}
+              ? '완료된 기간제 할일이 없습니다'
+              : '기간제 할일이 없습니다'}
           </div>
         ) : (
           <div className="space-y-2">
@@ -318,7 +345,9 @@ function MidTermTodo({ isDbConnected = false }) {
                     isOnHold
                       ? 'bg-gray-700 border-yellow-600 hover:border-yellow-500'
                       : isCompleted
-                      ? 'bg-gray-800 border-gray-600'
+                      ? 'bg-gray-800 border-green-600 hover:border-green-500'
+                      : isInProgress
+                      ? 'bg-gray-800 border-blue-600 hover:border-blue-500'
                       : 'bg-gray-800 border-gray-700 hover:border-gray-600'
                   }`}
                 >
@@ -338,39 +367,130 @@ function MidTermTodo({ isDbConnected = false }) {
                         >
                           {todo.title}
                         </span>
-                        {isOnHold && (
-                          <span className="text-xs px-1.5 py-0.5 bg-yellow-600 text-yellow-100 rounded">
-                            보류
-                          </span>
-                        )}
-                        {isInProgress && (
-                          <span className="text-xs px-1.5 py-0.5 bg-blue-600 text-blue-100 rounded">
-                            작업중
-                          </span>
-                        )}
                       </div>
-                      {todo.content && (
-                        <p className="text-xs text-gray-400 mt-1">{todo.content}</p>
-                      )}
-                      <div className="text-xs text-gray-500 mt-1">
-                        {formatDate(todo.start_date)} ~ {formatDate(todo.end_date)}
-                        {dday >= 0 ? (
-                          <span className="ml-2 text-blue-400">D-{dday}</span>
+                      <div className="mt-1">
+                        {editingContentId === todo.id ? (
+                          <div className="space-y-1">
+                            <textarea
+                              value={editContentValue}
+                              onChange={(e) => setEditContentValue(e.target.value)}
+                              placeholder="세부사항 (보류 업무 경과 등)..."
+                              rows="2"
+                              className="w-full px-2 py-1 text-xs bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500 resize-none"
+                              autoFocus
+                            />
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => {
+                                  handleUpdateContent(todo.id, editContentValue.trim() || null);
+                                }}
+                                className="px-2 py-0.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                              >
+                                저장
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditContentValue(todo.content || '');
+                                  setEditingContentId(null);
+                                }}
+                                className="px-2 py-0.5 text-xs bg-gray-700 text-white rounded hover:bg-gray-600"
+                              >
+                                취소
+                              </button>
+                            </div>
+                          </div>
                         ) : (
-                          <span className="ml-2 text-red-400">D+{Math.abs(dday)}</span>
+                          <div>
+                            {todo.content ? (
+                              <div className="flex items-start gap-1">
+                                <div className="text-xs flex-1 whitespace-pre-wrap text-gray-400">
+                                  {todo.content}
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    setEditContentValue(todo.content);
+                                    setEditingContentId(todo.id);
+                                  }}
+                                  className="text-xs text-blue-400 hover:text-blue-300"
+                                >
+                                  수정
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setEditContentValue('');
+                                  setEditingContentId(todo.id);
+                                }}
+                                className="text-xs text-gray-500 hover:text-gray-400"
+                              >
+                                + 세부사항 추가
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
-                      <div className="mt-2">
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="text-gray-400">진행률</span>
-                          <span className="text-gray-400">{todo.progress}%</span>
-                        </div>
-                        <div className="w-full bg-gray-700 rounded-full h-1.5">
-                          <div
-                            className="bg-blue-600 h-1.5 rounded-full transition-all"
-                            style={{ width: `${todo.progress}%` }}
-                          />
-                        </div>
+                      <div className="mt-1">
+                        {editingPeriodId === todo.id ? (
+                          <div className="space-y-1">
+                            <div className="grid grid-cols-2 gap-1">
+                              <input
+                                type="date"
+                                value={editPeriodData.start_date}
+                                onChange={(e) => setEditPeriodData({ ...editPeriodData, start_date: e.target.value })}
+                                className="px-2 py-1 text-xs bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
+                              />
+                              <input
+                                type="date"
+                                value={editPeriodData.end_date}
+                                onChange={(e) => setEditPeriodData({ ...editPeriodData, end_date: e.target.value })}
+                                className="px-2 py-1 text-xs bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
+                              />
+                            </div>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => {
+                                  handleUpdatePeriod(todo.id, editPeriodData.start_date, editPeriodData.end_date);
+                                }}
+                                className="px-2 py-0.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                              >
+                                저장
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditPeriodData({ start_date: '', end_date: '' });
+                                  setEditingPeriodId(null);
+                                }}
+                                className="px-2 py-0.5 text-xs bg-gray-700 text-white rounded hover:bg-gray-600"
+                              >
+                                취소
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-gray-500">
+                              {formatDate(todo.start_date)} ~ {formatDate(todo.end_date)}
+                              {dday >= 0 ? (
+                                <span className="ml-2 text-blue-400">D-{dday}</span>
+                              ) : (
+                                <span className="ml-2 text-red-400">D+{Math.abs(dday)}</span>
+                              )}
+                            </span>
+                            <button
+                              onClick={() => {
+                                setEditPeriodData({
+                                  start_date: formatDate(todo.start_date),
+                                  end_date: formatDate(todo.end_date)
+                                });
+                                setEditingPeriodId(todo.id);
+                              }}
+                              className="text-xs text-blue-400 hover:text-blue-300"
+                            >
+                              수정
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -392,20 +512,6 @@ function MidTermTodo({ isDbConnected = false }) {
                         ×
                       </button>
                     </div>
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    <button
-                      onClick={() => handleUpdateProgress(todo.id, Math.max(0, todo.progress - 10))}
-                      className="px-2 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-600"
-                    >
-                      -10%
-                    </button>
-                    <button
-                      onClick={() => handleUpdateProgress(todo.id, Math.min(100, todo.progress + 10))}
-                      className="px-2 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-600"
-                    >
-                      +10%
-                    </button>
                   </div>
                 </div>
               );
